@@ -5,7 +5,9 @@ ACIA_CTRL = $5003
 
 	.code
 
-	.export _acia_init, _pr_byte, _pr_nl, _pr_char
+	strptr: .res 2, $00 ; pointer for string or something
+
+	.export _acia_init, _pr_byte, _pr_nl, _pr_char, _print
 
 ; ~~~~~
 ; RESET
@@ -79,6 +81,20 @@ _pr_nl:
 	lda #$0a
 	jsr _pr_char
 	rts
+
+_print:
+	pha
+	ldx #0
+pr_loop:
+	lda (strptr),x
+	beq pr_done
+	jsr _pr_char
+	inx
+	jmp pr_loop
+pr_done:
+	pla
+	rts
+
 
 ; ~~~~~~~~~
 ; CONSTANTS
