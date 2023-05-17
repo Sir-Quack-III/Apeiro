@@ -1,0 +1,117 @@
+ca65 V2.18 - Fedora 2.19-4.fc37
+Main file   : shell.s
+Current file: shell.s
+
+000000r 1               ACIA_DATA = $5000
+000000r 1               ACIA_STATUS = $5001
+000000r 1               ACIA_CMD = $5002
+000000r 1               ACIA_CTRL = $5003
+000000r 1               
+000000r 1                   .code
+000000r 1               
+000000r 1                   .import _pr_char, _pr_nl
+000000r 1               
+000000r 1               _shell_begin:
+000000r 1  A2 00            ldx #0
+000002r 1               print_logo:
+000002r 1  BD rr rr     	lda apeiro_logo,x
+000005r 1  F0 07        	beq print_logo_1
+000007r 1  20 rr rr     	jsr _pr_char
+00000Ar 1  E8           	inx
+00000Br 1  4C rr rr     	jmp print_logo
+00000Er 1               print_logo_1:
+00000Er 1               
+00000Er 1               ; MAIN LOOP
+00000Er 1               _shell_loop:
+00000Er 1  A9 3E            lda #'>'
+000010r 1  20 rr rr     	jsr _pr_char
+000013r 1               rx_wait:
+000013r 1  AD 01 50     	lda ACIA_STATUS ; waits
+000016r 1  29 08        	and #$08
+000018r 1  F0 F9        	beq rx_wait
+00001Ar 1               
+00001Ar 1  AD 00 50     	lda ACIA_DATA
+00001Dr 1               
+00001Dr 1  48           	pha
+00001Er 1  49 0D        	eor #$0d
+000020r 1  F0 0D        	beq enter
+000022r 1  68           	pla
+000023r 1               
+000023r 1  48           	pha
+000024r 1  49 08        	eor #$08
+000026r 1  F0 1B        	beq backspace
+000028r 1  68           	pla
+000029r 1               
+000029r 1  20 rr rr     	jsr _pr_char
+00002Cr 1               
+00002Cr 1  4C rr rr     	jmp rx_wait
+00002Fr 1               
+00002Fr 1               ; ##############
+00002Fr 1               ; #  COMMANDS  #
+00002Fr 1               ; ##############
+00002Fr 1               
+00002Fr 1               
+00002Fr 1               enter:
+00002Fr 1  48           	pha
+000030r 1  A9 0D        	lda #$0d
+000032r 1  20 rr rr     	jsr _pr_char
+000035r 1  A9 0A        	lda #$0a
+000037r 1  20 rr rr     	jsr _pr_char
+00003Ar 1  A9 3E        	lda #'>'
+00003Cr 1  20 rr rr     	jsr _pr_char
+00003Fr 1  68           	pla
+000040r 1  4C rr rr     	jmp rx_wait
+000043r 1               
+000043r 1               backspace:
+000043r 1  48           	pha
+000044r 1  DA           	phx
+000045r 1  A2 00        	ldx #0
+000047r 1               backspace_1:
+000047r 1  BD rr rr     	lda delete,x
+00004Ar 1  F0 07        	beq backspace_2
+00004Cr 1  20 rr rr     	jsr _pr_char
+00004Fr 1  E8           	inx
+000050r 1  4C rr rr     	jmp backspace_1
+000053r 1               backspace_2:
+000053r 1  FA           	plx
+000054r 1  68           	pla
+000055r 1  4C rr rr     	jmp rx_wait
+000058r 1               
+000058r 1               
+000058r 1               ; #####################
+000058r 1               ; #  END OF COMMANDS  #
+000058r 1               ; #####################
+000058r 1               
+000058r 1               ; CONSTANTS
+000058r 1               
+000058r 1               apeiro_logo:
+000058r 1  20 20 40 40  	.byte "  @@@@    @@@@"
+00005Cr 1  40 40 20 20  
+000060r 1  20 20 40 40  
+000066r 1  0D 0A        	.byte $0d, $0a
+000068r 1  20 40 23 23  	.byte " @####@ @@####@"
+00006Cr 1  23 23 40 20  
+000070r 1  40 40 23 23  
+000077r 1  0D 0A        	.byte $0d, $0a
+000079r 1  40 23 20 20  	.byte "@#   ##@##   #@"
+00007Dr 1  20 23 23 40  
+000081r 1  23 23 20 20  
+000088r 1  0D 0A        	.byte $0d, $0a
+00008Ar 1  40 23 23 23  	.byte "@####@@ @####@"
+00008Er 1  23 40 40 20  
+000092r 1  40 23 23 23  
+000098r 1  0D 0A        	.byte $0d, $0a
+00009Ar 1  20 40 40 40  	.byte " @@@@    @@@@"
+00009Er 1  40 20 20 20  
+0000A2r 1  20 40 40 40  
+0000A7r 1  0D 0A        	.byte $0d, $0a
+0000A9r 1  41 70 65 69  	.byte "Apeiro Operating System v0.01"
+0000ADr 1  72 6F 20 4F  
+0000B1r 1  70 65 72 61  
+0000C6r 1  0D 0A 00     	.byte $0d, $0a, $00
+0000C9r 1               
+0000C9r 1               delete:
+0000C9r 1  1B 5B 31 44  	.byte $1b, '[', '1', 'D' ; move cursor 1 line left
+0000CDr 1  1B 5B 30 4A  	.byte $1b, '[', '0', 'J' ; clear screen from cursor
+0000D1r 1  00           	.byte $00 ; null terminator
+0000D1r 1               

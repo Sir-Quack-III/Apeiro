@@ -1,0 +1,39 @@
+Modules list:
+-------------
+main.o:
+    CODE              Offs=000000  Size=00000D  Align=00001  Fill=0000
+    VECTORS           Offs=000000  Size=000006  Align=00001  Fill=0000
+serial.o:
+    CODE              Offs=00000D  Size=000061  Align=00001  Fill=0000
+shell.o:
+    CODE              Offs=00006E  Size=0000D2  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+CODE                  008000  00813F  000140  00001
+VECTORS               00FFFA  00FFFF  000006  00001
+
+
+Exports list by name:
+---------------------
+_acia_init                00800D RLA    _pr_char                  00803A RLA    
+
+
+
+Exports list by value:
+----------------------
+_acia_init                00800D RLA    _pr_char                  00803A RLA    
+
+
+
+Imports list:
+-------------
+_acia_init (serial.o):
+    main.o                    main.s(6)
+_pr_char (serial.o):
+    shell.o                   shell.s(8)
+    main.o                    main.s(7)
+

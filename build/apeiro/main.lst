@@ -1,0 +1,26 @@
+ca65 V2.18 - Fedora 2.19-4.fc37
+Main file   : main.s
+Current file: main.s
+
+000000r 1                   .org $0000
+000000  1  00 00            strptr: .res 2, $00
+000002  1               
+000002  1                   .code
+000002  1               
+000002  1                   .import _acia_init
+000002  1                   .import _pr_char
+000002  1               
+000002  1               reset:
+000002  1  20 rr rr         jsr _acia_init
+000005  1               
+000005  1  A9 42            lda #'B'
+000007  1  20 rr rr         jsr _pr_char
+00000A  1               
+00000A  1               loop:
+00000A  1  4C 0A 00         jmp loop
+00000D  1               
+00000D  1                   .segment "VECTORS"
+00000D  1  00 00            .word $0000
+00000F  1  02 00            .word reset
+000011  1  00 00            .word $0000
+000011  1               

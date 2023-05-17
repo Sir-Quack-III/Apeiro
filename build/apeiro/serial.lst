@@ -1,0 +1,93 @@
+ca65 V2.18 - Fedora 2.19-4.fc37
+Main file   : serial.s
+Current file: serial.s
+
+000000r 1               ACIA_DATA = $5000
+000000r 1               ACIA_STATUS = $5001
+000000r 1               ACIA_CMD = $5002
+000000r 1               ACIA_CTRL = $5003
+000000r 1               
+000000r 1               	.code
+000000r 1               
+000000r 1               	.export _acia_init, _pr_byte, _pr_nl, _pr_char
+000000r 1               
+000000r 1               ; ~~~~~
+000000r 1               ; RESET
+000000r 1               ; ~~~~~
+000000r 1               
+000000r 1               _acia_init:
+000000r 1  A9 00        	lda #$00
+000002r 1  8D 01 50     	sta ACIA_STATUS
+000005r 1               
+000005r 1  A9 1F        	lda #$1f ; 19200 baud rate, 8 bits, no parity
+000007r 1  8D 03 50     	sta ACIA_CTRL
+00000Ar 1               
+00000Ar 1  A9 0B        	lda #$0b
+00000Cr 1  8D 02 50     	sta ACIA_CMD
+00000Fr 1               
+00000Fr 1  60           	rts
+000010r 1               
+000010r 1               
+000010r 1               _pr_byte:
+000010r 1  DA           	phx
+000011r 1  48           	pha
+000012r 1               
+000012r 1               	; get high nibble
+000012r 1  29 F0        	and #%11110000
+000014r 1  4A           	lsr
+000015r 1  4A           	lsr
+000016r 1  4A           	lsr
+000017r 1  4A           	lsr
+000018r 1               
+000018r 1  AA           	tax
+000019r 1  BD rr rr     	lda hexbits,x
+00001Cr 1  20 rr rr     	jsr _pr_char
+00001Fr 1               
+00001Fr 1  68           	pla
+000020r 1  48           	pha
+000021r 1               
+000021r 1  29 0F        	and #%00001111
+000023r 1               
+000023r 1  AA           	tax
+000024r 1  BD rr rr     	lda hexbits,x
+000027r 1  20 rr rr     	jsr _pr_char
+00002Ar 1               
+00002Ar 1  68           	pla
+00002Br 1  FA           	plx
+00002Cr 1  60           	rts
+00002Dr 1               
+00002Dr 1               _pr_char:
+00002Dr 1  8D 00 50     	sta ACIA_DATA
+000030r 1  48           	pha
+000031r 1               tx_wait:
+000031r 1  AD 01 50     	lda ACIA_STATUS
+000034r 1  29 10        	and #$10 ; check if its already tryin to send something
+000036r 1  F0 F9        	beq tx_wait
+000038r 1  20 rr rr     	jsr tx_delay
+00003Br 1               
+00003Br 1  68           	pla
+00003Cr 1  60           	rts
+00003Dr 1               
+00003Dr 1               tx_delay: ; delay because WDC is dumb >:(
+00003Dr 1  DA           	phx
+00003Er 1  A2 64        	ldx #100
+000040r 1               tx_delay_1:
+000040r 1  CA           	dex
+000041r 1  D0 FD        	bne tx_delay_1
+000043r 1  FA           	plx
+000044r 1  60           	rts
+000045r 1               
+000045r 1               _pr_nl:
+000045r 1  A9 0D        	lda #$0d
+000047r 1  20 rr rr     	jsr _pr_char
+00004Ar 1  A9 0A        	lda #$0a
+00004Cr 1  20 rr rr     	jsr _pr_char
+00004Fr 1  60           	rts
+000050r 1               
+000050r 1               ; ~~~~~~~~~
+000050r 1               ; CONSTANTS
+000050r 1               ; ~~~~~~~~~
+000050r 1  30 31 32 33  hexbits: .asciiz "0123456789abcdef"
+000054r 1  34 35 36 37  
+000058r 1  38 39 61 62  
+000060r 1               
